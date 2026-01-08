@@ -125,6 +125,44 @@ router.post('/refresh', async (req, res) => {
     }
 });
 
+router.get('/me', authenticate, (req, res) => {
+    return res.status(200).json({
+        user: req.user
+    })
+});
+
+router.post('/logout', (req, res) => {
+    res.clearCookie('refreshToken', { httpOnly: true, sameSite: 'Lax' });
+
+    res.status(200).json({
+        code: 200,
+        message: "Utilisateur déconnecté avec succès"
+    })
+});
+
+const authenticate = (req, res, next) => {
+    const authorized = req.headers['authorization'];
+
+    if(!authorized.startsWith('Bearer ') || !authorized) return res.status(401).json({
+        code: 401,
+        message: "Utilisateur non autorisé"
+    });
+    
+    const access_token = authorized.split(' ')[1];
+    try{
+        const decoded = jwt.verify(access_token, SECRET_KEY);
+        req.user = decoded;
+
+        next();
+        
+    }catch(error){
+        res.status(403).json({
+            code: 403,
+            message: "Token invalide ou expiré"
+        })
+    }
+}
+
 app.listen(3000, () => {
     console.log("The server is listening on the port: 3000");
 });
