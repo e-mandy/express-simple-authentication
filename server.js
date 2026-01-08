@@ -44,46 +44,46 @@ router.post('/register', async (req, res) => {
 });
 
 
-router.post('/login', async (req, res) => {
-    const { email, password } = req.body;
+    router.post('/login', async (req, res) => {
+        const { email, password } = req.body;
 
-    try{
-        const user = await User.findOne({ email });
+        try{
+            const user = await User.findOne({ email });
+            
+            if(!user) return res.status(401).json({
+                code: 401,
+                message: "Identifiants invalides"
+            });
         
-        if(!user) return res.status(401).json({
-            code: 401,
-            message: "Identifiants invalides"
-        });
-    
-        const isCorrect = await user.comparePassword(password);
+            const isCorrect = await user.comparePassword(password);
 
-        if(!isCorrect) return res.status(401).json({
-            code: 401,
-            message: "Identifiants invalides"
-        });
+            if(!isCorrect) return res.status(401).json({
+                code: 401,
+                message: "Identifiants invalides"
+            });
 
-        const token = jwt.sign({ userId: user._id }, SECRET_KEY, { expiresIn: '15m' });
+            const token = jwt.sign({ userId: user._id }, SECRET_KEY, { expiresIn: '15m' });
 
-        const refresh_token = jwt.sign({userId: user._id}, REFRESH_SECRET_KEY, { expiresIn: '7d' })
-    
-        return res.status(200).json({
-            code: 200,
-            message: "Utilisateur connecté",
-            data: {
-                user: {
-                    email: user.email
-                },
-                accessToken: token,
-                refreshToken: refresh_token
-            }
-        })
-    }catch(error){
-        return res.status(400).json({
-            code: 400,
-            message: "Connexion échouée"
-        })
-    }
-});
+            const refresh_token = jwt.sign({userId: user._id}, REFRESH_SECRET_KEY, { expiresIn: '7d' })
+        
+            return res.status(200).json({
+                code: 200,
+                message: "Utilisateur connecté",
+                data: {
+                    user: {
+                        email: user.email
+                    },
+                    accessToken: token,
+                    refreshToken: refresh_token
+                }
+            })
+        }catch(error){
+            return res.status(400).json({
+                code: 400,
+                message: "Connexion échouée"
+            })
+        }
+    });
 
 app.listen(3000, () => {
     console.log("The server is listening on the port: 3000");
