@@ -18,7 +18,7 @@ router.get('/setup', async (req, res) => {
     res.status(200).json({
         code: 200,
         qrcode: qrCode,
-        // C'était un cas d'entrainement sinon nous ne sommes pas censé envoyer le secret
+        // C'était un cas d'entrainement sinon nous ne sommes pas censé envoyer le secret. Il eest déjà dans le qrcode
         //secret: secret
     });
 });
